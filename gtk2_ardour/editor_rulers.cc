@@ -973,7 +973,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	}
 
 	std::vector<TempoMap::BBTPoint>::const_iterator i;
-	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 	double floor_lower_beat = floor(std::max (0.0, _session->tempo_map().beat_at_sample (lower)));
 
 	if (floor_lower_beat < 0.0) {
@@ -1138,7 +1138,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 	char buf[64];
 	gint  n = 0;
 	samplepos_t pos;
-	Timecode::BBT_Time next_beat;
+	Temporal::BBT_Time next_beat;
 	uint32_t beats = 0;
 	uint32_t tick = 0;
 	uint32_t skip;
@@ -1232,10 +1232,10 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
 			tick = skip; // the first non-beat tick
 			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
+			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
 
 				next_beat.beats = (*i).beat;
 				next_beat.bars = (*i).bar;
@@ -1301,11 +1301,11 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
 			tick = skip; // the first non-beat tick
 
 			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
+			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
 
 				next_beat.beats = (*i).beat;
 				next_beat.bars = (*i).bar;
@@ -1377,13 +1377,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			}
 
 			/* Add the tick marks */
-			skip = Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision;
+			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
 
 			next_beat.beats = (*i).beat;
 			next_beat.bars = (*i).bar;
 			tick = skip; // the first non-beat tick
 			t = 0;
-			while (tick < Timecode::BBT_Time::ticks_per_beat && (n < bbt_nmarks)) {
+			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
 
 				next_beat.ticks = tick;
 				pos = _session->tempo_map().sample_at_bbt (next_beat);
