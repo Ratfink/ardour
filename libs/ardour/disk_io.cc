@@ -366,14 +366,14 @@ DiskIOProcessor::set_track (boost::shared_ptr<Track> t)
  */
 void
 DiskIOProcessor::get_location_times(const Location* location,
-                   samplepos_t*     start,
-                   samplepos_t*     end,
-                   samplepos_t*     length)
+                   timepos_t*     start,
+                   timepos_t*     end,
+                   timecnt_t*     length)
 {
 	if (location) {
 		*start  = location->start();
 		*end    = location->end();
-		*length = *end - *start;
+		*length = location->length();
 	}
 }
 
