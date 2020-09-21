@@ -676,6 +676,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_plugin_descriptor,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
 
+	void loop_location (int start, int end);
 	int route_rename (int rid, char *s, lo_message msg);
 	int strip_group (int ssid, char *g, lo_message msg);
 	int strip_select_group (boost::shared_ptr<ARDOUR::Stripable> s, char *g);

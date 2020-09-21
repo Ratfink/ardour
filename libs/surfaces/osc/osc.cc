@@ -42,6 +42,8 @@
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
 
+#include "temporal/timeline.h"
+
 #include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -3396,7 +3398,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							session->request_locate ((*l)->start (), MustStop);
+							session->request_locate ((*l)->start_sample (), MustStop);
 							return 0;
 						} else if ((*l)->start () == session->transport_sample()) {
 							cur_mark = (*l);
@@ -3425,7 +3427,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	// get Locations that are marks
 	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 		if ((*l)->is_mark ()) {
-			lm.push_back (LocationMarker((*l)->name(), (*l)->start ()));
+			lm.push_back (LocationMarker((*l)->name(), (*l)->start_sample ()));
 		}
 	}
 	// sort them by position
@@ -4027,11 +4029,11 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		if (control) {
 			if (touch) {
 				//start touch
-				control->start_touch (control->session().transport_sample());
+				control->start_touch (timepos_t (control->session().transport_sample()));
 				ret = 0;
 			} else {
 				// end touch
-				control->stop_touch (control->session().transport_sample());
+				control->stop_touch (timepos_t (control->session().transport_sample()));
 				ret = 0;
 			}
 			// just in case some crazy surface starts sending control values before touch
@@ -4051,8 +4053,8 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 	if (ctrl) {
 		//start touch
 		if (ctrl->automation_state() == Touch && !ctrl->touching ()) {
-		ctrl->start_touch (ctrl->session().transport_sample());
-		_touch_timeout[ctrl] = 10;
+			ctrl->start_touch (timepos_t (ctrl->session().transport_sample()));
+			_touch_timeout[ctrl] = 10;
 		}
 	}
 
@@ -4331,6 +4333,12 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 		}
 	}
 	return float_message_with_id (X_("/strip/recenable"), ssid, 0, sur->feedback[2], get_address (msg));
+}
+
+void
+OSC::loop_location (int start, int end)
+{
+	BasicUI::loop_location (timepos_t (start), timepos_t (end));
 }
 
 int
@@ -6332,7 +6340,7 @@ OSC::periodic (void)
 		if (!(*x).second) {
 			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
 			// turn touch off
-			ctrl->stop_touch (ctrl->session().transport_sample());
+			ctrl->stop_touch (timepos_t (ctrl->session().transport_sample()));
 			_touch_timeout.erase (x++);
 		} else {
 			x++;
