@@ -525,7 +525,7 @@ MixerStrip::trim_start_touch ()
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->start_touch (_session->transport_sample());
+		route()->trim()->gain_control ()->start_touch (timepos_t (_session->transport_sample()));
 	}
 }
 
@@ -534,7 +534,7 @@ MixerStrip::trim_end_touch ()
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->stop_touch (_session->transport_sample());
+		route()->trim()->gain_control ()->stop_touch (timepos_t (_session->transport_sample()));
 	}
 }
 

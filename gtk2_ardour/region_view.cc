@@ -845,7 +845,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 }
 
 bool
-RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t sub_num)
+RegionView::trim_front (timepos_t const & new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;
@@ -882,7 +882,7 @@ RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t su
 }
 
 bool
-RegionView::trim_end (samplepos_t new_bound, bool no_overlap, const int32_t sub_num)
+RegionView::trim_end (timepos_t const & new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;
@@ -930,7 +930,7 @@ RegionView::thaw_after_trim ()
 
 
 void
-RegionView::move_contents (sampleoffset_t distance)
+RegionView::move_contents (timecnt_t const & distance)
 {
 	if (_region->locked()) {
 		return;

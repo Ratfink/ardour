@@ -2609,10 +2609,10 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
 }
 
 void
-Editor::set_snapped_cursor_position (samplepos_t pos)
+Editor::set_snapped_cursor_position (timepos_t const & pos)
 {
 	if (_edit_point == EditAtMouse) {
-		snapped_cursor->set_position(pos);
+		snapped_cursor->set_position (pos.samples());
 	}
 }
 
