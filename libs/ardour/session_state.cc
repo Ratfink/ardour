@@ -1540,6 +1540,20 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	/* need the tempo map setup ASAP */
+
+	if ((child = find_named_node (node, "TempoMap")) == 0) {
+		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		goto out;
+	} else {
+		try {
+			TempoMap::SharedPtr new_map (new TempoMap (*child, version));
+			TempoMap::update (new_map);
+		} catch (...) {
+			goto out;
+		}
+	}
+
 	node.get_property ("name", _name);
 
 	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
@@ -1626,18 +1640,6 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	} else if (load_sources (*child)) {
 		goto out;
-	}
-
-	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		goto out;
-	} else {
-		try {
-			TempoMap::SharedPtr new_map (new TempoMap (*child, version));
-			TempoMap::update (new_map);
-		} catch (...) {
-			goto out;
-		}
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
