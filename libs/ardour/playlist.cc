@@ -230,24 +230,24 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, timepos_t const & s
 
 		case Temporal::OverlapInternal:
 			offset = region->position().distance (start);
-			position = 0;
+			position = timepos_t (start.time_domain());
 			len = timecnt_t (cnt);
 			break;
 
 		case Temporal::OverlapStart:
-			offset = 0;
+			offset = timecnt_t (start.time_domain());
 			position = region->source_position();
 			len = region->position().distance (end);
 			break;
 
 		case Temporal::OverlapEnd:
 			offset = region->position().distance (start);
-			position = 0;
+			position = timepos_t (start.time_domain());
 			len = region->length() - offset;
 			break;
 
 		case Temporal::OverlapExternal:
-			offset = 0;
+			offset = timecnt_t (start.time_domain());
 			position = region->source_position();
 			len = region->length();
 			break;
@@ -331,7 +331,7 @@ Playlist::init (bool hide)
 	_frozen = false;
 	_capture_insertion_underway = false;
 	_combine_ops = 0;
-	_end_space = 0;
+	_end_space = timecnt_t (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 	_playlist_shift_active = false;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
@@ -1601,9 +1601,9 @@ Playlist::core_splice (timepos_t const & at, timecnt_t const & distance, boost::
 		if ((*i)->position() >= at) {
 			timepos_t new_pos = (*i)->position() + distance;
 			if (new_pos < 0) {
-				new_pos = 0;
-			} else if (new_pos >= std::numeric_limits<timepos_t>::max().earlier ((*i)->length())) {
-				new_pos = std::numeric_limits<timepos_t>::max().earlier ((*i)->length());
+				new_pos = timepos_t (new_pos.time_domain());
+			} else if (new_pos >= timepos_t::max (new_pos.time_domain()).earlier ((*i)->length())) {
+				new_pos = timepos_t::max (new_pos.time_domain()).earlier ((*i)->length());
 			}
 
 			(*i)->set_position (new_pos);
@@ -1650,9 +1650,9 @@ Playlist::core_ripple (timepos_t const & at, timecnt_t const & distance, RegionL
 
 		if ((*i)->position() >= at) {
 			timepos_t new_pos = (*i)->position() + distance;
-			timepos_t limit = std::numeric_limits<timepos_t>::max().earlier ((*i)->length());
+			timepos_t limit = timepos_t::max (new_pos.time_domain()).earlier ((*i)->length());
 			if (new_pos < 0) {
-				new_pos = 0;
+				new_pos = timepos_t (new_pos.time_domain());
 			} else if (new_pos >= limit ) {
 				new_pos = limit;
 			}
@@ -2437,10 +2437,12 @@ Playlist::get_extent_with_endspace () const
 pair<timepos_t, timepos_t>
 Playlist::_get_extent () const
 {
-	pair<timepos_t, timepos_t> ext (std::numeric_limits<timepos_t>::max(), std::numeric_limits<timepos_t>::min());
+#warning NUTEMPO domain should likely be a playlist property
+	Temporal::TimeDomain time_domain (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
+	pair<timepos_t, timepos_t> ext (timepos_t::max (time_domain), timepos_t (time_domain));
 
 	if (regions.empty()) {
-		ext.first = 0;
+		ext.first = timepos_t (time_domain);
 		return ext;
 	}
 
@@ -2726,7 +2728,7 @@ Playlist::nudge_after (timepos_t const & start, timecnt_t const & distance, bool
 					if ((*i)->position() > distance) {
 						new_pos = (*i)->position().earlier (distance);
 					} else {
-						new_pos = 0;
+						new_pos = timepos_t ((*i)->position().time_domain());;
 					}
 				}
 
