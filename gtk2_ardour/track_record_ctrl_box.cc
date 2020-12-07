@@ -43,6 +43,7 @@
 #include "gui_thread.h"
 #include "level_meter.h"
 #include "meter_patterns.h"
+#include "route_group_menu.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -70,6 +71,8 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 	: SessionHandlePtr (s)
 	, RouteUI (s)
 	, _clear_meters (true)
+	, _route_group_menu (0)
+	, _route_group_button (S_("RTAV|G"))
 	, _ctrls_button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_BOTH))
 {
 	RouteUI::set_route (rt);
@@ -92,6 +95,14 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 	_number_label.set_elements ((ArdourButton::Element) (ArdourButton::Edge | ArdourButton::Body | ArdourButton::Text | ArdourButton::Inactive));
 	_number_label.set_alignment (.5, .5);
 
+	PropertyList* plist = new PropertyList();
+	plist->add (ARDOUR::Properties::group_mute, true);
+	plist->add (ARDOUR::Properties::group_solo, true);
+	_route_group_menu = new RouteGroupMenu (_session, plist);
+
+	_route_group_button.set_name ("route button");
+	_route_group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &TrackRecordControlBox::route_group_click), false);
+
 	_level_meter = new LevelMeterHBox (s);
 	_level_meter->set_meter (_route->shared_peak_meter ().get ());
 	_level_meter->clear_meters ();
@@ -109,11 +120,13 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 	_ctrls.attach (*monitor_input_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	_ctrls.attach (*monitor_disk_button,  3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	_ctrls.attach (*mute_button,          4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	_ctrls.attach (name_label,            1, 5, 1, 2, Gtk::FILL,   Gtk::SHRINK, 0, 0);
+	_ctrls.attach (name_label,            1, 4, 1, 2, Gtk::FILL,   Gtk::SHRINK, 0, 0);
+	_ctrls.attach (_route_group_button,   4, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	_ctrls.attach (*_level_meter,         5, 6, 0, 2, Gtk::SHRINK, Gtk::FILL,   4, 0);
 
 	set_tooltip (*mute_button, _("Mute"));
 	set_tooltip (*rec_enable_button, _("Record"));
+	set_tooltip (_route_group_button, _("Group"));
 
 	set_name_label ();
 	update_sensitivity ();
@@ -124,6 +137,7 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 	_ctrls_button_size_group->add_widget (*mute_button);
 	_ctrls_button_size_group->add_widget (*monitor_input_button);
 	_ctrls_button_size_group->add_widget (*monitor_disk_button);
+	_ctrls_button_size_group->add_widget (_route_group_button);
 
 	_frame.add (_ctrls);
 	pack_start (_frame, false, false);
@@ -133,6 +147,7 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 	monitor_disk_button->show ();
 	mute_button->show ();
 	_level_meter->show ();
+	_route_group_button.show();
 	_number_label.show ();
 	name_label.show ();
 	_ctrls.show ();
@@ -142,6 +157,7 @@ TrackRecordControlBox::TrackRecordControlBox (Session* s, boost::shared_ptr<ARDO
 TrackRecordControlBox::~TrackRecordControlBox ()
 {
 	delete _level_meter;
+	delete _route_group_menu;
 	CatchDeletion (this);
 }
 
@@ -313,4 +329,23 @@ TrackRecordControlBox::reset_peak_display ()
 {
 	_route->shared_peak_meter ()->reset_max ();
 	_clear_meters = true;
+}
+
+bool
+TrackRecordControlBox::route_group_click (GdkEventButton* ev)
+{
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (_route->route_group()) {
+			_route->route_group()->remove (_route);
+		}
+		return false;
+	}
+
+	WeakRouteList r;
+	r.push_back (route ());
+	_route_group_menu->build (r);
+
+	Gtkmm2ext::anchored_menu_popup (_route_group_menu->menu(), &_route_group_button, "", 1, ev->time);
+
+	return true;
 }

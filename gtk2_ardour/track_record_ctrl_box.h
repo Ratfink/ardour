@@ -48,6 +48,7 @@ namespace ARDOUR
 }
 
 class LevelMeterHBox;
+class RouteGroupMenu;
 
 class TrackRecordControlBox : public Gtk::VBox, public AxisView, public RouteUI
 {
@@ -93,6 +94,8 @@ private:
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
+	bool route_group_click (GdkEventButton*);
+
 	/* RouteUI */
 	void route_property_changed (const PBD::PropertyChange&);
 	void route_color_changed ();
@@ -105,6 +108,8 @@ private:
 
 	LevelMeterHBox*             _level_meter;
 	ArdourWidgets::ArdourButton _number_label;
+	RouteGroupMenu*             _route_group_menu;
+	ArdourWidgets::ArdourButton _route_group_button;
 
 	Glib::RefPtr<Gtk::SizeGroup>        _ctrls_button_size_group;
 	static Glib::RefPtr<Gtk::SizeGroup> _track_number_size_group;
