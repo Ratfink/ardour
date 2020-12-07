@@ -2854,23 +2854,23 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case bbt_show_16:
 			case bbt_show_4:
 			case bbt_show_1:
-				ret = timepos_t (tmap->quarter_note_at (tmap->round_to_bar (tmap->bbt_at (presnap))));
+				ret = timepos_t (tmap->quarters_at (tmap->round_to_bar (tmap->bbt_at (presnap))));
 				break;
 			case bbt_show_quarters:
-				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_beat ());
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_beat ());
 				break;
 			case bbt_show_eighths:
-				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (1 * divisor, direction));
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (1 * divisor, direction));
 				break;
 			case bbt_show_sixteenths:
-				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (2 * divisor, direction));
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (2 * divisor, direction));
 				break;
 			case bbt_show_thirtyseconds:
-				ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (4 * divisor, direction));
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (4 * divisor, direction));
 				break;
 		}
 	} else {
-		ret = timepos_t (tmap->quarter_note_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
+		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
 	}
 
 	return ret;

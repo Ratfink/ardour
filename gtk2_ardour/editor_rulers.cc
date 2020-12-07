@@ -976,14 +976,14 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	std::vector<Temporal::Point>::const_iterator i;
 	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	Beats floor_lower_beat = std::max (Beats(), tmap->quarter_note_at (lower)).round_down_to_beat ();
+	Beats floor_lower_beat = std::max (Beats(), tmap->quarters_at_sample (lower)).round_down_to_beat ();
 
 	if (floor_lower_beat < 0.0) {
 		floor_lower_beat = 0.0;
 	}
 
 	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat, _session->sample_rate());
-	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarter_note_at  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
+	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
 
 	_session->bbt_time (timepos_t (beat_before_lower_pos), lower_beat);
 	_session->bbt_time (timepos_t (beat_after_upper_pos), upper_beat);
@@ -1066,7 +1066,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		break;
 	}
 
-	const Beats ceil_upper_beat = std::max (Beats(), tmap->quarter_note_at (upper)).round_up_to_beat() + Beats (1, 0);
+	const Beats ceil_upper_beat = std::max (Beats(), tmap->quarters_at_sample (upper)).round_up_to_beat() + Beats (1, 0);
 
 	if (ceil_upper_beat == floor_lower_beat) {
 		return;
