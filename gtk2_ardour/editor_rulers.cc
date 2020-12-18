@@ -1074,7 +1074,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_bars = tmap->bbt_at (ceil_upper_beat).bars - tmap->bbt_at (floor_lower_beat).bars;
 
-	beats = (ceil_upper_beat - floor_lower_beat);// - bbt_bars;  possible thinko; this fixes the problem (for me) where measure lines alternately appear&disappear while playing at certain zoom scales
+	beats = (ceil_upper_beat - floor_lower_beat).get_beats(); // - bbt_bars;  possible thinko; this fixes the problem (for me) where measure lines alternately appear&disappear while playing at certain zoom scales
 	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / 5.0;
 
 	/* Only show the bar helper if there aren't many bars on the screen */
