@@ -687,7 +687,7 @@ private:
 	}
 
 	MidiRegionView* _region_view;
-	samplepos_t     _last_pos;
+	Temporal::timepos_t _last_pos;
 	double          _y;
 
 };
@@ -851,7 +851,7 @@ private:
 	bool _copy;
 	bool _movable;
 	Temporal::Tempo _grab_bpm;
-	double _grab_qn;
+	Temporal::Beats _grab_qn;
 	XMLNode* _before_state;
 };
 
@@ -877,7 +877,7 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	double _grab_qn;
+	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint* _tempo;
 	XMLNode* _before_state;
 	bool     _drag_valid;
@@ -907,7 +907,7 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	double _grab_qn;
+	Temporal::Beats _grab_qn;
 	Temporal::Tempo  _grab_tempo;
 	Temporal::TempoPoint* _tempo;
 	Temporal::TempoPoint* _next_tempo;
@@ -938,7 +938,7 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	double _grab_qn;
+	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint* _tempo;
 	XMLNode* _before_state;
 	bool _drag_valid;
