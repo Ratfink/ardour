@@ -2097,6 +2097,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		break;
 	}
 
+	_verbose_cursor->hide ();
+
 	return ret;
 }
 
@@ -2222,6 +2224,37 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		if (mouse_sample (where.sample, ignored)) {
 			snap_to_with_modifier (where, event);
 			set_snapped_cursor_position (where.sample);
+		}
+
+		/* display peaks */
+		if (mouse_mode == MouseContent) {
+			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(entered_regionview);
+			if (arv) {
+				boost::shared_ptr<ARDOUR::AudioRegion> ar = boost::dynamic_pointer_cast<ARDOUR::AudioRegion> (arv->region ());
+				assert (ar);
+
+				PeakData p;
+				for (uint32_t chn = 0; chn < ar->n_channels (); ++chn) {
+					PeakData pc;
+					ar->read_peaks (&pc, 1, where.sample + ar->start () - ar->position (), samples_per_pixel, chn, samples_per_pixel);
+					if (chn == 0) {
+						p.min = pc.min;
+						p.max = pc.max;
+					} else {
+						p.min = std::min (p.min, pc.min);
+						p.max = std::max (p.max, pc.max);
+					}
+				}
+
+				if (ar->n_channels () > 0) {
+					char tmp[128];
+					sprintf (tmp, _("Min: %+.2f (%.1f dBFS)\nMax: %+.2f (%.1f dBFS)\n"),
+							p.min, accurate_coefficient_to_dB (fabsf (p.min)),
+							p.max, accurate_coefficient_to_dB (fabsf (p.max)));
+					_verbose_cursor->set (tmp);
+					_verbose_cursor->show ();
+				}
+			}
 		}
 	}
 
